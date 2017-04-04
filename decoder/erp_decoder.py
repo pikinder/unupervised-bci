@@ -34,5 +34,3 @@ class UnsupervisedERPDecoder(AdaptiveERPDecoder):
 
 class LDAERPDecoder(SupervisedERPDecoder):
     pass
-
-

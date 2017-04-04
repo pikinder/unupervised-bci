@@ -1,5 +1,5 @@
 class ERPData(object):
-    def __init__(self,subject,session,eeg,labels,stimuli):
+    def __init__(self,subject,session,eeg,labels,stimuli,channels):
         """
         :param subject the subject
         :param session the session
@@ -15,9 +15,14 @@ class ERPData(object):
         self.labels = labels
         self.stimuli = stimuli
         self.target_stimulus = [s[l==1][0] for s,l in zip(stimuli,labels)] # Extract the target labels out of it
+        self.channels = channels
 
 class TrialIterator(object):
+    """
+    Iterator that iterates over trials
+    """
     def __init__(self,data):
+        assert type(data) is ERPData
         self.data = data
         self.trial_idx = 0
 
@@ -30,17 +35,9 @@ class TrialIterator(object):
         :return:
         """
 
-class SupervisedTrialIterator(object):
-    def __init__(self,data):
-        self.data = data
-        self.trial_idx = 0
-        self.stimulus_idx = 0
 
-    def __iter__(self):
-        return self
-
-    def next(self):
-        """
-        Iterate over all the stimulus presentations
-        :return:
-        """
+class SupervisedTrialIterator(TrialIterator):
+    """
+    Iterating over stimuli
+    """
+    pass

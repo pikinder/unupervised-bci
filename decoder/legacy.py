@@ -206,7 +206,46 @@ class p300_speller_base:
         return outputs
 
 
-import numpy as np
+class p300_speller_unigram(p300_speller_base):
+    '''
+        P300 speller based on an unigram language model
+
+        The speller with Uniform probabilities for each character boils down to the standard
+        unsupervised speller.
+
+        returns (probs,data_log_lik)
+    '''
+    def __init__(self,w,mu_w,delta_w,sigma_t,nr_commands,max_delta_w,prior_command_log_probs):
+        p300_speller_base.__init__(self,w,mu_w,delta_w,sigma_t,nr_commands,max_delta_w)
+        self.prior_command_log_probs = prior_command_log_probs.copy()
+
+    def _compute_character_probabilities(self,likelihoods,stimuli):
+        '''
+            Expectation using an unigram language model
+        '''
+        data_log_likelihood = 0.0
+        probs = np.zeros((len(likelihoods),self.nr_commands))
+        # Loop over characters
+        for c_i in range(len(likelihoods)):
+
+            # Current probabilities
+            cur_probs = probs[c_i,:]
+            #Loop over possible assignations
+            for a_i in range(self.nr_commands):
+                ## Select data which should contains P300 and which not give the current character is correct
+                stimuli_counts = np.sum(stimuli[c_i]==a_i,axis=0)
+                cur_probs[a_i]=self.prior_command_log_probs[a_i]
+                cur_probs[a_i]+=np.sum(likelihoods[c_i][stimuli_counts>0,0]) # P300 given character
+                cur_probs[a_i]+=np.sum(likelihoods[c_i][stimuli_counts==0,1]) # non P300 given character
+
+            # Normalize
+            normalizing = logsumexp(cur_probs)
+            cur_probs[:] = np.exp(cur_probs-normalizing)
+            data_log_likelihood += normalizing
+        # Return both the probabilities and the data log likelihood
+        return (probs,data_log_likelihood)
+
+
 
 
 class online_speller:

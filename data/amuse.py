@@ -59,21 +59,20 @@ class AmuseMat(object):
         self.idx = mf['data'][0][idx]['trial'][0][0][0]
 
         # Labels, target non-target
-        self.label = mf['bbci_mrk'][0][idx]['y'][0][0][0]
+        self.label = 1.0*(mf['data'][0][idx]['y'][0][0][0]==1)
 
         # Presented symbol
-        self.stimulus = mf['bbci_mrk'][0][idx]['event'][0][0]['desc'][0][0].squeeze()
+        self.stimulus = mf['data'][0][idx]['y_stim'][0][0][0].squeeze()-1
 
         # trial identifier
-        self.trial = mf['bbci_mrk'][0][idx]['event'][0][0]['trial_idx'][0][0]
-
+        self.trial = mf['data'][0][idx]['y_trialIdx'][0][0][0].squeeze()
 
 def preprocess_amuse_mat(subject):
     _bp_low = .5
     _bp_high = 15.
-    _subsample = 7 # Assume 250 Hz -> 35.7 Hz
+    _subsample = 10 # Assume 250 Hz -> 25 Hz, below nyquist, but not a problem for BCI ...
     _fs_needed = 250
-    _max_time = 0.6 # Time after the stimulus
+    _max_time = 0.7 # Time after the stimulus
     _offsets =  np.r_[0:int(_fs_needed*_max_time):_subsample]
 
     matfiles  = [AmuseMat(subject,session) for session in ['calib','online']]
@@ -90,8 +89,8 @@ def preprocess_amuse_mat(subject):
         y = []
         stim = []
         for trial, stimulus, label, idx in zip(mf.trial,mf.stimulus,mf.label,mf.idx):
+            #print(trial,idx,idx+_offsets)
             assert trial >= prev_trial
-
             if trial != prev_trial:
                 x.append([])
                 y.append([])
@@ -107,6 +106,7 @@ def preprocess_amuse_mat(subject):
             session = mf.session,
             eeg = np.concatenate([[xx]for xx in x],axis=0), # Weird line of code. But creates a shape of (trials, stimuli, channels, time)
             labels = np.concatenate([[yy] for yy in y],axis=0),
-            stimuli = np.concatenate([[ss] for ss in stim],axis=0)
+            stimuli = np.concatenate([[ss] for ss in stim],axis=0),
+            channels = mf.channels
         ))
     store(data,('%s/%s.pkl')%(config._processed,subject))
