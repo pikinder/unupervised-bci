@@ -3,11 +3,14 @@ from __future__ import division
 from __future__ import print_function
 
 import numpy as np
-from scipy.io import loadmat
 import config
+
+from scipy.io import loadmat
+from tools.preprocess import causal_filter
+from tools.fileio import store
+from data.erp_data import ERPData
 # Channels that should not be used for EEG
 _exclude_channels = ['EOGv','EOGh','MasL','MasR']
-
 
 class AmuseMat(object):
     """
@@ -47,21 +50,63 @@ class AmuseMat(object):
 
         # Sampling frequency
         self.fs= 1.0 * mf['data'][0][idx]['fs'][0][0][0][0]
+        assert self.fs == 250 # make sure the data for amuse is uniform :)
 
         # Number of different stimuli
         self.Ns = 6
 
         # index of the stimulus in the EEG array
-        self.idx = mf['bbci_mrk'][0][idx]['time'][0][0][0]
+        self.idx = mf['data'][0][idx]['trial'][0][0][0]
 
         # Labels, target non-target
         self.label = mf['bbci_mrk'][0][idx]['y'][0][0][0]
 
         # Presented symbol
-        self.stimulus = mf['bbci_mrk'][0][idx]['event'][0][0]['desc'][0][0]
+        self.stimulus = mf['bbci_mrk'][0][idx]['event'][0][0]['desc'][0][0].squeeze()
 
         # trial identifier
         self.trial = mf['bbci_mrk'][0][idx]['event'][0][0]['trial_idx'][0][0]
 
 
+def preprocess_amuse_mat(subject):
+    _bp_low = .5
+    _bp_high = 15.
+    _subsample = 7 # Assume 250 Hz -> 35.7 Hz
+    _fs_needed = 250
+    _max_time = 0.6 # Time after the stimulus
+    _offsets =  np.r_[0:int(_fs_needed*_max_time):_subsample]
 
+    matfiles  = [AmuseMat(subject,session) for session in ['calib','online']]
+    data = []
+
+    for mf in matfiles:
+        # Hardcoded the sampling frequency for this dataset
+        assert mf.fs == _fs_needed
+        # Filter the EEG
+        mf.eeg = causal_filter(mf.eeg,_bp_low,_bp_high,mf.fs)
+
+        prev_trial = -1
+        x = []
+        y = []
+        stim = []
+        for trial, stimulus, label, idx in zip(mf.trial,mf.stimulus,mf.label,mf.idx):
+            assert trial >= prev_trial
+
+            if trial != prev_trial:
+                x.append([])
+                y.append([])
+                stim.append([])
+                prev_trial = trial
+
+            stim[-1].append(stimulus)
+            y[-1].append(label)
+            x[-1].append(mf.eeg[:,idx+_offsets])
+
+        data.append(ERPData(
+            subject = mf.subject,
+            session = mf.session,
+            eeg = np.concatenate([[xx]for xx in x],axis=0), # Weird line of code. But creates a shape of (trials, stimuli, channels, time)
+            labels = np.concatenate([[yy] for yy in y],axis=0),
+            stimuli = np.concatenate([[ss] for ss in stim],axis=0)
+        ))
+    store(data,('%s/%s.pkl')%(config._processed,subject))
