@@ -9,7 +9,7 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 import matplotlib.pyplot as plt
 plt.ion()
 
-subject = 'VPfaz'
+subject = 'VPkw'
 
 data,data_test = load('%s/%s.pkl'%(config._processed,subject))
 print('data is loaded...')
@@ -25,12 +25,6 @@ def get_xy(data):
         tot_label.append(y)
     return np.vstack(tot_data),np.hstack(tot_label)
 
-xt,yt = get_xy(data)
-xe,ye = get_xy(data_test)
-clf = LDA(solver='eigen',shrinkage='auto')
-clf.fit(xt,yt*2-1)
-print roc_auc_score(ye*2-1,clf.decision_function(xe))
-
 _data_dim = np.prod(data.eeg.shape[2:])
 _nr_commands = 6
 
@@ -41,7 +35,7 @@ _nr_commands = 6
 sigma_t = 1.0*np.eye(1)
 delta_w =10.0*np.eye(_data_dim)
 mu_w = np.zeros((_data_dim,1))
-init_w = np.random.randn(_data_dim,1)#np.zeros((data_dim,1))
+init_w = np.random.randn(_data_dim,1)
 
 
 '''
@@ -64,25 +58,28 @@ for x,y,s in zip(data.eeg,data.labels,data.stimuli):
     speller.add_letter([x],[stimuli])
 tot_data = np.vstack(tot_data)
 tot_label = np.hstack(tot_label)
-'''
-    Execute EM and evaluate
-'''
+
+# Run for 100 iterations
 for k in range(100):
-    ''' DO MAXIMIZATION AT THE END, TO GET GOOD EVALUATION OF THE INITIALIZATION '''
+    print "\n\nIteration: %d"%k
+
+    # Update the model
+    if k != 0:
+        speller._maximization()
     speller._expectation()
-    speller_output=speller.do_individual_intens(tot_data)
+
+    # Check selection accuracy
+    selected_stimuli = np.argmax(speller.probs[:,:],axis=1)
+    correct_offline=np.sum(data.target_stimulus==selected_stimuli)
+    print "true: ", data.target_stimulus
+    print "pred: ", selected_stimuli
+    print 'correct: %.2f' % (100.0*correct_offline/selected_stimuli.shape[0],)
+
+    # Check auc on individiual stimuli
+    stim_probs = speller.do_individual_intens(tot_data)
+    auc = roc_auc_score(tot_label,stim_probs)
+    print "auc: %.3f" %(auc,)
+
+    # Print statistics
     print ""
     print "sigma_t %.2f delta_w: %.2f" % ( speller.sigma_t[0,0], speller.delta_w[0,0])
-    auc = roc_auc_score(tot_label,speller_output)
-    print "auc: %.3f" %(auc,)
-    selected_stimuli = np.argmax(speller.probs[:,:],axis=1)
-    print "desired: ", data.target_stimulus
-    print "selected:", selected_stimuli+1
-    correct_offline=np.sum(data.target_stimulus==selected_stimuli)
-    print 'correct: %.2f' % (100.0*correct_offline/selected_stimuli.shape[0],)
-    if True and auc < 0.5:
-        speller.w = -speller.w
-        print "AUC HACK"
-
-    ''' DO MAXIMIZATION AT THE END, TO GET GOOD EVALUATION OF THE INITIALIZATION '''
-    speller._maximization()

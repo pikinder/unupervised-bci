@@ -1,16 +1,19 @@
 import numpy as np
-import scipy as sp
 from scipy.misc import logsumexp
 
+def mv_normal_cov_like(labels, data, sigma_t):
+    """
+    Compute the likelihood of a gaussian...]: 
+    
+    :param labels:
+    :param data: 
+    :param sigma_t: 
+    :return: 
+    """
+    kwad_deel = np.array(labels - data).flatten()
+    exp_deel = np.sum(-1. / 2. / sigma_t[0, 0] * (kwad_deel) ** 2.)
+    return np.log(1. / (np.sqrt(np.pi * 2. * sigma_t[0, 0]))) * 1.0 * kwad_deel.shape[0] + exp_deel
 
-class B:
-    def mv_normal_cov_like(self, labels, data, sigma_t):
-        kwad_deel = np.array(labels - data).flatten()
-        exp_deel = np.sum(-1. / 2. / sigma_t[0, 0] * (kwad_deel) ** 2.)
-        return np.log(1. / (np.sqrt(np.pi * 2. * sigma_t[0, 0]))) * 1.0 * kwad_deel.shape[0] + exp_deel
-
-
-compute_gaussian = B()
 
 
 class p300_speller_base:
@@ -198,9 +201,9 @@ class p300_speller_base:
     def do_individual_intens(self, tot_data):
         outputs = np.zeros(tot_data.shape[0])
         for i in range(tot_data.shape[0]):
-            prob_p = compute_gaussian.mv_normal_cov_like(self.label[0] * np.ones(1),
+            prob_p = mv_normal_cov_like(self.label[0] * np.ones(1),
                                                          np.dot(tot_data[i:i + 1, :], self.w), self.sigma_t)
-            prob_n = compute_gaussian.mv_normal_cov_like(self.label[1] * np.ones(1),
+            prob_n = mv_normal_cov_like(self.label[1] * np.ones(1),
                                                          np.dot(tot_data[i:i + 1, :], self.w), self.sigma_t)
             outputs[i] = np.exp(prob_p - logsumexp(np.array([prob_n, prob_p])))
         return outputs
@@ -282,31 +285,3 @@ class online_speller:
         liks = np.array([speller.data_log_likelihood for speller in self.spellers])
         best_id = np.argmax(liks)
         return self.spellers[best_id].probs
-
-
-class double_init_speller:
-    def __init__(self, w, speller_class, *args):
-        self.spellers = [speller_class(w, *args), speller_class(-w, *args)]
-        self.data = self.spellers[0].data
-
-    def _expectation(self):
-        for speller in self.spellers:
-            speller._expectation()
-        ##
-        liks = np.array([speller.data_log_likelihood for speller in self.spellers])
-        best_id = np.argmax(liks)
-        self.probs = self.spellers[best_id].probs
-        self.data_log_likelihood = self.spellers[best_id].data_log_likelihood
-
-    def _maximization(self):
-        for speller in self.spellers:
-            speller._maximization()
-
-    def add_letter(self, letter_data, letter_stimuli):
-        for speller in self.spellers:
-            speller.add_letter(letter_data, letter_stimuli)
-
-    def do_individual_intens(self, tot_data):
-        liks = np.array([speller.data_log_likelihood for speller in self.spellers])
-        best_id = np.argmax(liks)
-        return self.spellers[best_id].do_individual_intens(tot_data)

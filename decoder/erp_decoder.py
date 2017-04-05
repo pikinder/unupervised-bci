@@ -18,7 +18,7 @@ class ERPDecoder(object):
 
 class SupervisedERPDecoder(ERPDecoder):
     def train(self,x,y):
-        pass
+        raise NotImplementedError("Subclass responsability")
 
 
 class AdaptiveERPDecoder(ERPDecoder):
