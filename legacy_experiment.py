@@ -9,21 +9,10 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
 import matplotlib.pyplot as plt
 plt.ion()
 
-subject = 'VPkw'
+subject = 'VPfas'
 
-data,data_test = load('%s/%s.pkl'%(config._processed,subject))
+data,data_test = load('%s/amuse_%s.pkl'%(config._processed,subject))
 print('data is loaded...')
-def get_xy(data):
-    tot_data = []
-    tot_label = []
-    # Add data to speller
-    for x,y,s in zip(data.eeg,data.labels,data.stimuli):
-        x = x[:,::].reshape(x.shape[0],-1)
-        x = x-x.mean(axis=1)[:,np.newaxis]
-        x = x/np.std(x,axis=1)[:,np.newaxis]
-        tot_data.append(x)
-        tot_label.append(y)
-    return np.vstack(tot_data),np.hstack(tot_label)
 
 _data_dim = np.prod(data.eeg.shape[2:])
 _nr_commands = 6
@@ -52,10 +41,7 @@ for x,y,s in zip(data.eeg,data.labels,data.stimuli):
     x = x/np.std(x,axis=1)[:,np.newaxis]
     tot_data.append(x)
     tot_label.append(y)
-    stimuli = np.zeros((1,x.shape[0]))
-    for idx,ss in enumerate(s):
-        stimuli[0,idx]=ss
-    speller.add_letter([x],[stimuli])
+    speller.add_letter([x],[s.T])
 tot_data = np.vstack(tot_data)
 tot_label = np.hstack(tot_label)
 

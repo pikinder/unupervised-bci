@@ -1,3 +1,9 @@
+"""
+Re-use of the original (research) code for unsupervised BCI.
+
+This code has a wrapper in the erp_decoder.py
+"""
+
 import numpy as np
 from scipy.misc import logsumexp
 

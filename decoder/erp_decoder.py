@@ -1,19 +1,45 @@
 class ERPDecoder(object):
+    """
+    Class to perform ERP Experiments
 
-    def add_letters(self):
-        pass
+    I will use the following naming conventions.
+
+    Trial: this contains all the data to predict execute a single command with the BCI.
+    Iteration: An iteration is the part of the trial that contains each stimulus once.
+    Stimulus: a single event followed by a target or non-target response
+
+    """
 
     def new_trial(self):
-        pass
+        """
+
+        :return:
+        """
+        raise NotImplementedError("Subclass responsability")
 
     def add_iteration(self,x,s):
-        pass
+        """
+        Add the iteration to the last trial
+        :param x:
+        :param s:
+        :return:
+        """
+        raise NotImplementedError("Subclass responsability")
 
     def predict_last_trial(self):
-        pass
+        """
+        Make a prediction of the last trial
+
+        :return:
+        """
+        raise NotImplementedError("Subclass responsability")
 
     def predict_all_trials(self):
-        pass
+        """
+        Make a prediction of all trials
+        :return:
+        """
+        raise NotImplementedError("Subclass responsability")
 
 
 class SupervisedERPDecoder(ERPDecoder):
