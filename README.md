@@ -5,8 +5,8 @@ This repository contains code implementing an unsupervised decoder for Event-Rel
  3. (Work in progress) A supervised baseline using shrinkage LDA.
  
 ## Usage
- 1. Download and preprocess the data by running __setup.sh__
- 2. run an __experiment_*.py__ script, the different scripts are documented below.
+ 1. Download and preprocess the data by running _setup.sh_
+ 2. run an _experiment*py_ script, the different scripts are documented below.
 
 ## Experiments
 ### experiment_amuse_batch.py
