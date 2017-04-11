@@ -2,7 +2,7 @@
 This repository contains code implementing an unsupervised decoder for Event-Related Potential based Brain-Computer Interfaces. The following methods are included:
  1. Unsupervised EM [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0033758). A video of our setup used in the demonstration at NIPS 2012 is available [here](https://www.youtube.com/watch?v=63nS5IiAt_4). It shows a randomly initialised decoder that learns how to interpret the user's brain signals without supervision.
  2. (Work in progress) Learning from Label Proportions based decoding.
- 3. (Work in progress) A supervised baseline using shrinkage LDA.
+ 3. A supervised baseline using shrinkage LDA.
  
 ## Usage
  1. Download and preprocess the data by running _setup.sh_
@@ -10,7 +10,7 @@ This repository contains code implementing an unsupervised decoder for Event-Rel
 
 ## Experiments
 ### experiment_amuse_batch.py
-This experiment loads the online data from a single subject. It gives the unsupervised classifier access to all data (without labels) and performs several update iterations, in each iteration the selection accuracy and single trial accuracy are printed. This script does not always converge to a good solution and a restart might be required. Tricks to address this issue are discussed in [1]. 
+This experiment loads the online data from a single subject. It gives the unsupervised classifier access to all data (without labels) and performs several update iterations, in each iteration the selection accuracy and single trial accuracy are printed. It is also compared to a supervised LDA classifier with analytic regularisation. The EM classifier does not always converge to a good solution and a restart might be required. Tricks to address this issue are discussed in [1]. 
 
 ## Datasets
 The repository contains code to download (and if needed pre-process) the following datasets. 
