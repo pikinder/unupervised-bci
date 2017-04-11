@@ -1,11 +1,8 @@
 # unupervised-bci
-This repository contains code implementing an unsupervised decoder for Event-Related Potential based Brain-Computer Interfaces. 
-
-## Decoders
+This repository contains code implementing an unsupervised decoder for Event-Related Potential based Brain-Computer Interfaces. The following methods are included:
  1. Unsupervised EM [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0033758).
- 2. (Work in progress) Transfer learning based decoding from our NIPS publication 
- 3. (Work in progress) Learning from Label Proportions based decoding.
- 4. (Work in progress) A supervised baseline using shrinkage LDA
+ 2. (Work in progress) Learning from Label Proportions based decoding.
+ 3. (Work in progress) A supervised baseline using shrinkage LDA.
  
 ## Datasets
 The repository contains code to download (and if needed pre-process) the following datasets.
@@ -15,24 +12,16 @@ The repository contains code to download (and if needed pre-process) the followi
 ## Usage
  1. Download and preprocess the data by running __setup.sh__
  2. run an _experiment*.py_ script
-
-## Datasets used
- 1. The data from the AMUSE paradigm by Schreuder et al.
  
-## Implemented experiments
-### Amuse Batch
+## Experiments
+### experiment_amuse_batch.py
+This experiment loads the online data from a single subject. It gives the unsupervised classifier access to all data (without labels) and performs several update iterations, in each iteration the selection accuracy and single trial accuracy are printed. This script does not always converge to a good solution and a restart might be required. Tricks to address this issue are discussed in [1]. 
 
 ## Code was tested using:
  * python 2.7.12
  * sklearn 0.18.1
  * numpy 1.12.1
  * scipy 0.19.0
- 
-## Work in progress
- * Inclusion of a script to simulate an online experiment
- * Inclusion of a transfer learning script
- * Inclusion of a script to compare to supervised evaluation
- * Inclusion of Learning from Label Proportions
  
 ## References
  1. Kindermans et al. [_A bayesian model for exploiting application constraints to enable unsupervised training of a P300-based BCI_](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0033758)
