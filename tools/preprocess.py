@@ -1,4 +1,13 @@
 from scipy.signal import butter,lfilter
+import numpy as np
+
+
+def flatten_normalise_bias(x):
+    x = x.reshape(x.shape[0],-1)
+    x = x - np.mean(x,axis=1)[:,np.newaxis]
+    x = x/(np.var(x,axis=1)+0.000001)[:,np.newaxis]
+    x = np.hstack([x,np.ones((x.shape[0],1))])
+    return x
 
 def causal_filter(x,low,high,fs):
     """

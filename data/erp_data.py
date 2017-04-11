@@ -69,7 +69,7 @@ class TrialIterator(object):
     Iterator that iterates over trials
     """
     def __init__(self,data):
-        assert type(data) is ERPData
+        assert isinstance(data,ERPData)
         self.data = data
         self.trial_idx = 0
 
@@ -81,10 +81,9 @@ class TrialIterator(object):
         Iterate over all the stimulus presentations
         :return:
         """
-
-
-class SupervisedTrialIterator(TrialIterator):
-    """
-    Iterating over stimuli
-    """
-    pass
+        if self.trial_idx == self.data.eeg.shape[0]:
+            raise StopIteration
+        else:
+            x, s = self.data.eeg[self.trial_idx], self.data.stimuli[self.trial_idx]
+            self.trial_idx += 1
+            return x, s

@@ -175,7 +175,7 @@ class p300_speller_base:
         self.delta_w = 1. * (self.data_dim) / np.dot(self.w.T - self.mu_w.T, self.w - self.mu_w) * np.eye(self.data_dim)
         if self.delta_w[0][0] >= self.max_delta_w:
             self.delta_w = self.max_delta_w * np.eye(self.delta_w.shape[0])
-            print "LIMIT DELTA_W"
+
 
     def _maximization_sigma_t(self, projection=None):
         '''
