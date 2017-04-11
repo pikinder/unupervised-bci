@@ -1,4 +1,5 @@
 from data.erp_data import ERPData,TrialIterator
+from tools.preprocess import flatten_normalise_bias
 import numpy as np
 
 class ERPDecoder(object):
@@ -45,17 +46,55 @@ class ERPDecoder(object):
     def predict_all_trials(self):
         """
         Make a prediction of all trials
-        :return:
+        :return: a numpy array with the predictions of all trials
         """
         raise NotImplementedError("Subclass responsability")
 
-    def apply_single_trial(self,x):
+    def apply_single_stimulus(self, x):
         """
 
         :param x:
         :return:
         """
         raise NotImplementedError("Subclass responsability")
+
+class LDADecoder(ERPDecoder):
+    """
+    A basic EM decoder. Not to be used in online experiments.
+    There the OnlineUnsupervsedEM decoder should be used
+    """
+    def __init__(self,n_stimuli,x,y):
+        self.n_stimuli = n_stimuli
+        from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+        self.preprocess = lambda x : flatten_normalise_bias(x)[:,:-1] # The -1 is to not use the bias, LDA does this for us
+        self.clf = LDA(solver='lsqr',shrinkage='auto')
+        self.clf.fit(self.preprocess(x),y)
+        self.eeg = []
+        self.stimuli = []
+
+    def add_trial(self,x,s):
+        """
+
+        :return:
+        """
+        self.eeg.append(self.preprocess(x))
+        self.stimuli.append(s)
+
+    def predict_all_trials(self):
+        output = []
+        for x,s in zip(self.eeg,self.stimuli):
+            outputs = np.zeros(self.n_stimuli)
+            for idx in range(self.n_stimuli):
+                eeg = np.array([xx for xx, ss in zip(x,s) if idx in ss])
+                if eeg.shape == 0:
+                    outputs[idx] = -np.inf
+                else:
+                    outputs[idx] = self.apply_single_stimulus(eeg).mean()
+            output.append(np.argmax(outputs))
+        return np.array(output)
+
+    def apply_single_stimulus(self,x):
+        return self.clf.decision_function(flatten_normalise_bias(x)[:,:-1])
 
 class AdaptiveERPDecoder(ERPDecoder):
     """
@@ -67,7 +106,8 @@ class AdaptiveERPDecoder(ERPDecoder):
 
 class UnsupervisedEM(AdaptiveERPDecoder):
     """
-
+    A basic EM decoder. Not to be used in online experiments.
+    There the OnlineUnsupervsedEM decoder should be used
     """
     def __init__(self,n_dim,n_stimuli):
         super(UnsupervisedEM,self).__init__(n_dim,n_stimuli)
@@ -86,7 +126,6 @@ class UnsupervisedEM(AdaptiveERPDecoder):
 
         :return:
         """
-        from tools.preprocess import flatten_normalise_bias
         self.speller.add_letter([flatten_normalise_bias(x)],[s.T])
 
     def predict_all_trials(self):
@@ -98,6 +137,5 @@ class UnsupervisedEM(AdaptiveERPDecoder):
         self.speller._expectation()
         self.speller._maximization()
 
-    def apply_single_trial(self,x):
-        from tools.preprocess import flatten_normalise_bias
+    def apply_single_stimulus(self, x):
         return self.speller.do_individual_intens(flatten_normalise_bias(x))
