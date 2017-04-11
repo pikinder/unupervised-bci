@@ -6,7 +6,7 @@ This repository contains code implementing an unsupervised decoder for Event-Rel
  
 ## Usage
  1. Download and preprocess the data by running __setup.sh__
- 2. run an _experiment*.py_ script, the different scripts are documented below.
+ 2. run an __experiment_*.py__ script, the different scripts are documented below.
 
 ## Experiments
 ### experiment_amuse_batch.py
