@@ -24,10 +24,14 @@ The repository contains code to download (and if needed pre-process) the followi
  * sklearn 0.18.1
  * numpy 1.12.1
  * scipy 0.19.0
- 
+
+## Acknowledgement
+Most of the code was written when I was supported by the EU on a Marie-Curie Fellowship: 657679.
+
+
 ## References
  1. Kindermans et al. [_A bayesian model for exploiting application constraints to enable unsupervised training of a P300-based BCI_](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0033758), (2012) PLoS One 
  2. Kindermans et al. [_A P300 BCI for the masses: prior information enables instant unsupervised spelling_](http://papers.nips.cc/paper/4775-a-p300-bci-for-the-masses-prior-information-enables-instant-unsupervised-spelling.pdf), (2012) Neural Information Processing Systems (NIPS)
- 3. Schreuder et al. [_Listen, you are writing! Speeding up online spelling with a dynamic auditory BCI_](http://journal.frontiersin.org/article/10.3389/fnins.2011.00112/full) (2011) Frontiers
+ 3. Schreuder et al. [_Listen, you are writing! Speeding up online spelling with a dynamic auditory BCI_](http://journal.frontiersin.org/article/10.3389/fnins.2011.00112/full) (2011) Frontiers in Neuroscience
  4. Quadrianto et al. [_Estimating Labels from Label Proportions_](http://www.jmlr.org/papers/volume10/quadrianto09a/quadrianto09a.pdf), (2009) JMLR
  5. Hübner et al. [_Learning from Label Proportions in Brain-Computer Interfaces: Online Unsupervised Learning with Guarantees_](https://arxiv.org/abs/1701.07213), (2017) PLoS One
