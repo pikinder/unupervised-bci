@@ -6,8 +6,8 @@ This repository contains code implementing an unsupervised decoder for Event-Rel
  
 ## Usage
  1. Download and preprocess the data by running _setup.sh_
- 2. run an _experiment*py_ script, the different scripts are documented below.
-
+ 2. run one of the included ipython notebooks
+ 
 ## Experiments
 ### experiment_amuse_batch.py
 This experiment loads the online data from a single subject. It gives the unsupervised classifier access to all data (without labels) and performs several update iterations, in each iteration the selection accuracy and single trial accuracy are printed. It is also compared to a supervised LDA classifier with analytic regularisation. The EM classifier does not always converge to a good solution and a restart might be required. Tricks to address this issue are discussed in [1]. 

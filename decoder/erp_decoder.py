@@ -122,7 +122,7 @@ class UnsupervisedEM(AdaptiveERPDecoder):
 
     def __init__(self, n_dim, n_stimuli):
         super(UnsupervisedEM, self).__init__(n_dim, n_stimuli)
-        from legacy import p300_speller_unigram
+        from decoder.legacy import p300_speller_unigram
 
         # Variance etc ...
         sigma_t = 1.0 * np.eye(1)

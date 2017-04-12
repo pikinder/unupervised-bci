@@ -68,6 +68,13 @@ class ERPData(object):
         """
         return np.vstack(self.eeg), np.hstack(self.labels)
 
+class LLP_ERPData(ERPData):
+    def __init__(self,subject,session,eeg,labels,stimuli,channels,groups,ratios):
+        super(LLP_ERPData,self).__init__(subject,session,eeg,labels,stimuli,channels)
+        self.groups = groups
+        self.ratios  = ratios
+
+
 class TrialIterator(object):
     """
     Iterator that iterates over trials
