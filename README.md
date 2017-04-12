@@ -1,7 +1,7 @@
 # unupervised-bci
 This repository contains code implementing an unsupervised decoder for Event-Related Potential based Brain-Computer Interfaces. The following methods are included:
  1. Unsupervised EM [[1]](http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0033758). A video of our setup used in the demonstration at NIPS 2012 is available [here](https://www.youtube.com/watch?v=63nS5IiAt_4). It shows a randomly initialised decoder that learns how to interpret the user's brain signals without supervision.
- 2. (Work in progress) Learning from Label Proportions based decoding.
+ 2. (Work in progress) Learning from Label Proportions based decoding. A basic notebook doing this in a batch setting is proveded (experiment_llp_basic.ipnyb). It has to be integrated in the other framework.
  3. A supervised baseline using shrinkage LDA.
  
 ## Usage

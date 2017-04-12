@@ -18,14 +18,14 @@ class ERPData(object):
         session : string
                 the name of the session
 
-        eeg : a list of numpy arrays
+        eeg : an iterable of numpy arrays
                 each component of the list is an array of (S x C x L)
                 S is the number of stimuli in the trial, C i the number of EEG channels and L is the length of the trial
 
-        labels : a list of numpy arrays
+        labels : an iterable of numpy arrays
                 one array per trial, with the target -non target labelling per stimulus in the trial
 
-        stimuli : a list of numpy arrays
+        stimuli : an iterable of numpy arrays
                 For each trial it has the structure of (S, #S).
                 S is the number of stimulus presentations.
                 #S is the number of stimuli presented in a stimulus presentation (e.g. std row-column: 6, Amuse: 1)
@@ -69,10 +69,10 @@ class ERPData(object):
         return np.vstack(self.eeg), np.hstack(self.labels)
 
 class LLP_ERPData(ERPData):
-    def __init__(self,subject,session,eeg,labels,stimuli,channels,groups,ratios):
+    def __init__(self,subject,session,eeg,labels,stimuli,channels,group,ratio):
         super(LLP_ERPData,self).__init__(subject,session,eeg,labels,stimuli,channels)
-        self.groups = groups
-        self.ratios  = ratios
+        self.group = group
+        self.ratio = ratio
 
 
 class TrialIterator(object):
