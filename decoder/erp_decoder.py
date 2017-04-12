@@ -1,6 +1,11 @@
-from data.erp_data import ERPData,TrialIterator
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+from data.erp_data import ERPData, TrialIterator
 from tools.preprocess import flatten_normalise_bias
 import numpy as np
+
 
 class ERPDecoder(object):
     """
@@ -13,19 +18,20 @@ class ERPDecoder(object):
     Stimulus: a single event followed by a target or non-target response
 
     """
-    def __init__(self,n_dim,n_stimuli):
+
+    def __init__(self, n_dim, n_stimuli):
         self.n_dim = n_dim
         self.n_stimuli = n_stimuli
 
-    def add_data(self,data):
+    def add_data(self, data):
         """
 
         :param data:
         :return:
         """
-        assert isinstance(data,ERPData)
-        for x,s in TrialIterator(data):
-            self.add_trial(x,s)
+        assert isinstance(data, ERPData)
+        for x, s in TrialIterator(data):
+            self.add_trial(x, s)
 
     def predict_last_trial(self):
         """
@@ -36,7 +42,7 @@ class ERPDecoder(object):
         # This code is horribly inefficient but works always
         return self.predict_all_trials()[-1]
 
-    def add_trial(self,x,s):
+    def add_trial(self, x, s):
         """
 
         :return:
@@ -58,21 +64,24 @@ class ERPDecoder(object):
         """
         raise NotImplementedError("Subclass responsability")
 
+
 class LDADecoder(ERPDecoder):
     """
     A basic EM decoder. Not to be used in online experiments.
     There the OnlineUnsupervsedEM decoder should be used
     """
-    def __init__(self,n_stimuli,x,y):
+
+    def __init__(self, n_stimuli, x, y):
         self.n_stimuli = n_stimuli
         from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
-        self.preprocess = lambda x : flatten_normalise_bias(x)[:,:-1] # The -1 is to not use the bias, LDA does this for us
-        self.clf = LDA(solver='lsqr',shrinkage='auto')
-        self.clf.fit(self.preprocess(x),y)
+        # The -1 is to not use the bias, LDA does this for us
+        self.preprocess = lambda x: flatten_normalise_bias(x)[:,:-1]
+        self.clf = LDA(solver='lsqr', shrinkage='auto')
+        self.clf.fit(self.preprocess(x), y)
         self.eeg = []
         self.stimuli = []
 
-    def add_trial(self,x,s):
+    def add_trial(self, x, s):
         """
 
         :return:
@@ -82,10 +91,10 @@ class LDADecoder(ERPDecoder):
 
     def predict_all_trials(self):
         output = []
-        for x,s in zip(self.eeg,self.stimuli):
+        for x, s in zip(self.eeg, self.stimuli):
             outputs = np.zeros(self.n_stimuli)
             for idx in range(self.n_stimuli):
-                eeg = np.array([xx for xx, ss in zip(x,s) if idx in ss])
+                eeg = np.array([xx for xx, ss in zip(x, s) if idx in ss])
                 if eeg.shape == 0:
                     outputs[idx] = -np.inf
                 else:
@@ -93,8 +102,9 @@ class LDADecoder(ERPDecoder):
             output.append(np.argmax(outputs))
         return np.array(output)
 
-    def apply_single_stimulus(self,x):
-        return self.clf.decision_function(flatten_normalise_bias(x)[:,:-1])
+    def apply_single_stimulus(self, x):
+        return self.clf.decision_function(flatten_normalise_bias(x)[:, :-1])
+
 
 class AdaptiveERPDecoder(ERPDecoder):
     """
@@ -109,29 +119,31 @@ class UnsupervisedEM(AdaptiveERPDecoder):
     A basic EM decoder. Not to be used in online experiments.
     There the OnlineUnsupervsedEM decoder should be used
     """
-    def __init__(self,n_dim,n_stimuli):
-        super(UnsupervisedEM,self).__init__(n_dim,n_stimuli)
+
+    def __init__(self, n_dim, n_stimuli):
+        super(UnsupervisedEM, self).__init__(n_dim, n_stimuli)
         from legacy import p300_speller_unigram
 
         # Variance etc ...
-        sigma_t = 1.0*np.eye(1)
-        delta_w =10.0*np.eye(self.n_dim+1)
-        delta_w[-1,-1]=0 # Do not regularise the bias
-        mu_w = np.zeros((self.n_dim+1,1))
-        init_w = np.random.randn(self.n_dim+1,1)
-        self.speller = p300_speller_unigram(w=init_w,mu_w=mu_w,delta_w=delta_w,sigma_t=sigma_t,nr_commands=self.n_stimuli,max_delta_w=10.**3.,prior_command_log_probs=-np.log(self.n_stimuli)*np.ones(self.n_stimuli))
+        sigma_t = 1.0 * np.eye(1)
+        delta_w = 10.0 * np.eye(self.n_dim + 1)
+        delta_w[-1, -1] = 0  # Do not regularise the bias
+        mu_w = np.zeros((self.n_dim + 1, 1))
+        init_w = np.random.randn(self.n_dim + 1, 1)
+        self.speller = p300_speller_unigram(w=init_w, mu_w=mu_w, delta_w=delta_w, sigma_t=sigma_t,
+                                            nr_commands=self.n_stimuli, max_delta_w=10. ** 3.,
+                                            prior_command_log_probs=-np.log(self.n_stimuli) * np.ones(self.n_stimuli))
 
-    def add_trial(self,x,s):
+    def add_trial(self, x, s):
         """
 
         :return:
         """
-        self.speller.add_letter([flatten_normalise_bias(x)],[s.T])
+        self.speller.add_letter([flatten_normalise_bias(x)], [s.T])
 
     def predict_all_trials(self):
         self.speller._expectation()
         return self.speller.probs.argmax(axis=1)
-
 
     def update_decoder(self):
         self.speller._expectation()

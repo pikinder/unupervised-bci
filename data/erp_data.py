@@ -1,3 +1,7 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 
 class ERPData(object):
@@ -67,6 +71,11 @@ class ERPData(object):
 class TrialIterator(object):
     """
     Iterator that iterates over trials
+    It returns X, U
+    X are the processed datapoints in this trial as (S, C, T) with S=Stimuli, C=Channels , T=Time
+    U are the stimuli that are highlighted in a trial
+
+    It does not send label information
     """
     def __init__(self,data):
         assert isinstance(data,ERPData)
